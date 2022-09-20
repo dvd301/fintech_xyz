@@ -173,6 +173,10 @@ class "billing" {
 class "POST /payment/{billing_id}" {
 .. path ..
 {field} integer <b>billing_id</b>
+.. body ..
+{field} integer <b>payment_amount</b>
+{field} string <b>payment_method</b>
+{field} string <b>description</b>
 .. responses ..
 200: {field} string "success"
 400: {field} <i>Error</i> 
