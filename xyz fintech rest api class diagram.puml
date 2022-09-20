@@ -1,0 +1,205 @@
+@startuml
+hide empty members
+set namespaceSeparator none
+
+interface "/gettoken" {
+}
+
+interface "/customer" {
+}
+
+interface "/loan" {
+}
+
+interface "/billing" {
+}
+
+interface "/payment" {
+}
+
+class "POST /gettoken" {
+.. query ..
+{field} string <b>username</b>
+{field} string <b>password</b>
+.. responses ..
+200: {field} Object token 
+400: {field} <i>Error</i> 
+}
+
+class "token" {
+{field} string <b>description</b>
+{field} string <b>token</b>
+.. expired_at ..
+{field} string <b>date</b>
+{field} integer <b>timezone_type</b>
+{field} string <b>timezone</b>
+}
+
+"POST /gettoken" ..> token
+
+"/gettoken" ..> "POST /gettoken"
+
+class "POST /customer/create" {
+.. body ..
+{field} string <b>cust_name</b>
+{field} string <b>cell_num</b>
+{field} string <b>email</b>
+{field} string <b>passwd_enc</b>
+{field} string <b>profile_img</b>
+{field} string <b>idcard_img</b>
+{field} boolean <b>is_biometric</b>
+.. responses ..
+200: {field} string "success"
+400: {field} <i>Error</i> 
+}
+
+class "PUT /customer/uploadimg" {
+.. body ..
+{field} integer <b>cust_id</b>
+{field} string <b>profile_img</b>
+{field} string <b>idcard_img</b>
+.. responses ..
+200: {field} string "success"
+400: {field} <i>Error</i> 
+}
+
+class "GET /customer" {
+.. responses ..
+200: {field} Object[] customer
+400: {field} <i>Error</i> 
+}
+
+class "GET /customer/{cust_id}" {
+.. path ..
+{field} integer <b>cust_id</b>
+.. responses ..
+200: {field} Object[] customer
+400: {field} <i>Error</i> 
+}
+
+class "customer" {
+.. body ..
+{field} string <b>cust_name</b>
+{field} string <b>cell_num</b>
+{field} string <b>email</b>
+{field} string <b>passwd_enc</b>
+{field} string <b>profile_img</b>
+{field} string <b>idcard_img</b>
+{field} boolean <b>is_biometric</b>
+}
+
+"/customer" ..> "POST /customer/create" 
+"/customer" ..> "PUT /customer/uploadimg" 
+"/customer" ..> "GET /customer"
+"/customer" ..> "GET /customer/{cust_id}"
+"GET /customer" ..> "customer"
+"GET /customer/{cust_id}" ..> "customer"
+
+class "POST /loan/request" {
+.. body ..
+{field} integer <b>cust_id</b>
+{field} integer <b>principal_amount</b>
+{field} integer <b>tenor</b>
+.. responses ..
+200: {field} string "success"
+400: {field} <i>Error</i> 
+}
+
+class "GET /loan/request" {
+.. responses ..
+200: {field} Object[] loanreq
+400: {field} <i>Error</i> 
+}
+
+class "GET /loan/request/{cust_id}" {
+.. path ..
+{field} integer <b>cust_id</b>
+.. responses ..
+200: {field} Object[] loanreq
+400: {field} <i>Error</i> 
+}
+
+class "loanreq" {
+.. body ..
+{field} integer <b>loan_id</b>
+{field} datetime <b>loan_req_date</b>
+{field} string <b>cust_id</b>
+{field} string <b>cust_name</b>
+{field} string <b>loan_principal_amount</b>
+{field} integer <b>tenor</b>
+{field} integer <b>loan_status</b>
+{field} integer <b>collectible_status</b>
+{field} string <b>description</b>
+}
+
+class "POST /loan/assessment" {
+.. body ..
+{field} integer <b>loan_id</b>
+{field} integer <b>approval_status</b>
+{field} string <b>reason</b>
+{field} string <b>description</b>
+.. responses ..
+200: {field} string "success"
+400: {field} <i>Error</i> 
+}
+
+"/loan" ..> "POST /loan/request" 
+"/loan" ..> "GET /loan/request" 
+"/loan" ..> "GET /loan/request/{cust_id}"   
+"/loan" ..> "POST /loan/assessment" 
+"GET /loan/request" ..> "loanreq" 
+"GET /loan/request/{cust_id}" ..> "loanreq" 
+
+class "GET /billing/{loan_id}" {
+.. path ..
+{field} integer <b>loan_id</b>
+.. responses ..
+200: {field} Object[] billing
+400: {field} <i>Error</i> 
+}
+
+class "billing" {
+.. body ..
+{field} integer <b>loan_id</b>
+{field} integer <b>billing_id</b>
+{field} datetime <b>billing_date</b>
+{field} integer <b>billing_amount</b>
+{field} integer <b>billing_status</b>
+}
+
+"/billing" ..> "GET /billing/{loan_id}" 
+"GET /billing/{loan_id}" ..> "billing" 
+
+class "POST /payment/{billing_id}" {
+.. path ..
+{field} integer <b>billing_id</b>
+.. responses ..
+200: {field} string "success"
+400: {field} <i>Error</i> 
+}
+
+class "GET /payment/{loan_id}" {
+.. path ..
+{field} integer <b>loan_id</b>
+.. responses ..
+200: {field} Object[] payment
+400: {field} <i>Error</i> 
+}
+
+class "payment" {
+.. body ..
+{field} integer <b>loan_id</b>
+{field} integer <b>billing_id</b>
+{field} integer <b>payment_id</b>
+{field} integer <b>billing_amount</b>
+{field} integer <b>payment_status</b>
+{field} string <b>payment_method</b>
+{field} string <b>description</b>
+}
+
+
+"/payment" ..> "POST /payment/{billing_id}" 
+"/payment" ..> "GET /payment/{loan_id}" 
+"GET /payment/{loan_id}"  ..> "payment" 
+
+@enduml
